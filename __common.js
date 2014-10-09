@@ -1,19 +1,26 @@
 ;(function($, doc, win) {
   "use strict";
-  /* mainfunction */
   
-  function UMI(){
-  	this.defaults = {
+  
+  function setConf(){
+	  return {
 	  	 version : "0.1",
-	  	jsprefix : "/.json",
+	  	jsprefix : ".json",
 		   prots : {
 			  	  upage : "/upage/",
 			  	  udata : "/udata/",
 			  	uobject : "/uobject/"
 		   }
-  	};
-  	//getcurrentpage
-  	this.page = this.jsonDecode(this.defaults.prots.upage+window.location.pathname+this.defaults.jsprefix).page;
+	  };
+  }
+  
+  /* mainfunction */
+  
+  
+  function UMI(){
+  	this.conf = setConf();
+  	/* start */
+  	this.init();
   }
   /*
 
@@ -24,6 +31,21 @@
   
   
   */
+  
+  
+  /* INIT */
+  
+  UMI.prototype.init = function(){
+	//getcurrentpage
+  	this.page = this.jsonDecode(this.conf.prots.upage+window.location.pathname+this.conf.jsprefix).page;
+  	console.log("init load");
+  }
+  
+  /* confs */
+  
+  UMI.prototype.confs = function() {
+	  return this;
+  }
   
   /* HTTPRequest */
   
@@ -43,11 +65,58 @@
 	 return JSON.parse(content);
   }
   
-  /* CurrentVersion of module */
-  UMI.prototype.getVersion = function(){
-	  console.log(this.defaults.version);
+  /* CurrentVersion of script */
+  UMI.prototype.getVersion = function() {
+	  console.log(this.conf.version);
 	  return true;
   }
+  /*
+
+  
+  !CORE MODULE
+  
+  
+  */
+  
+  UMI.prototype.core = function (method,argums){
+  
+  	
+  	if (argums && argums.length) {
+	    var response = UMI.prototype.jsonDecode(this.conf.prots.udata + "core/"+ method + "/" + argums.join("/") + this.conf.jsprefix);
+  	} else {
+		var response = UMI.prototype.jsonDecode(this.conf.prots.udata + "core/"+ method + this.conf.jsprefix);  	
+  	}
+	return response;
+	
+  }
+  /*
+
+  
+  !DATA MODULE
+  
+  
+  */
+  
+  UMI.prototype.data = {
+  	conf : setConf(),
+  	/*
+  	*
+  	* data getProperty(element_id, prop_name)
+  	*
+  	* element_id - pageid in umi
+  	* prop_name - property name
+  	*
+  	*/
+  	getProperty : function(element_id,prop_name) {
+	  console.info("data getProperty");
+	  var response = UMI.prototype.jsonDecode(this.conf.prots.upage + element_id + "." + prop_name + this.conf.jsprefix);
+	  return response;
+	}
+	
+  }
+  
+
+  
   /* onload */
   $(window).load(function(){
 	  window.umi = new UMI();
