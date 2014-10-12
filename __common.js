@@ -108,13 +108,24 @@
   	*
   	*/
   	getProperty : function(element_id,prop_name) {
-	  console.info("data getProperty");
 	  var response = UMI.prototype.jsonDecode(this.conf.prots.upage + element_id + "." + prop_name + this.conf.jsprefix);
 	  return response;
 	}
 	
   }
   
+  /*
+
+  
+  !MENU MODULE
+  
+  
+  */
+
+  UMI.prototype.menuDraw = function(method,menu_id){
+	  var response = UMI.prototype.jsonDecode(this.conf.prots.udata + "menu/"+ method + "/" + menu_id + this.conf.jsprefix);
+	  return response;
+  }
 
   
   /* onload */
