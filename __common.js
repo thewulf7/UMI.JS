@@ -1,26 +1,46 @@
 ;(function($, doc, win) {
   "use strict";
   
+  var start = new Date();
   
-  function setConf(){
-	  return {
+  /* CONFIG */
+  
+  function Configuration(){
+	 this.config = {
 	  	 version : "0.1",
 	  	jsprefix : ".json",
-		   prots : {
-			  	  upage : "/upage/",
-			  	  udata : "/udata/",
-			  	uobject : "/uobject/"
-		   }
+	    protocol : {
+		  	  upage : "/upage/",
+		  	  udata : "/udata/",
+		  	uobject : "/uobject/"
+	    }
 	  };
   }
   
-  /* mainfunction */
+  Configuration.prototype.setValue = function(name,val) {
+  	try {
+	  this.config[name] = val;
+  	} catch(err) {
+	  	throw err;
+  	}
+  }
   
+  var regedit = new Configuration();
   
-  function UMI(){
-  	this.conf = setConf();
+  /* construct */
+  function UMI(params){
+  
+  	for (var obj in params) {
+  		regedit.setValue(obj,params[obj]);
+  	}
   	/* start */
   	this.init();
+  }
+  /* MODULE */
+  
+  function Module(moduleName,version){
+	  	this.name = moduleName;
+	 this.version = version;
   }
   /*
 
@@ -33,18 +53,13 @@
   */
   
   
+  
   /* INIT */
   
   UMI.prototype.init = function(){
 	//getcurrentpage
-  	this.page = this.jsonDecode(this.conf.prots.upage+window.location.pathname+this.conf.jsprefix).page;
+  	this.page = this.jsonDecode(regedit.config.protocol.upage+window.location.pathname+regedit.config.jsprefix).page;	
   	console.log("init load");
-  }
-  
-  /* confs */
-  
-  UMI.prototype.confs = function() {
-	  return this;
   }
   
   /* HTTPRequest */
@@ -67,7 +82,7 @@
   
   /* CurrentVersion of script */
   UMI.prototype.getVersion = function() {
-	  console.log(this.conf.version);
+	  console.log(regedit.config.version);
 	  return true;
   }
   /*
@@ -77,14 +92,14 @@
   
   
   */
+  UMI.prototype.core = new Module("core","0.1");
   
-  UMI.prototype.core = function (method,argums){
-  
+  UMI.prototype.core.makeCall = function (method,argums){
   	
   	if (argums && argums.length) {
-	    var response = UMI.prototype.jsonDecode(this.conf.prots.udata + "core/"+ method + "/" + argums.join("/") + this.conf.jsprefix);
+	    var response = UMI.prototype.jsonDecode(regedit.config.protocol.udata + "core/"+ method + "/" + argums.join("/") + regedit.config.jsprefix);
   	} else {
-		var response = UMI.prototype.jsonDecode(this.conf.prots.udata + "core/"+ method + this.conf.jsprefix);  	
+		var response = UMI.prototype.jsonDecode(regedit.config.protocol.udata + "core/"+ method + regedit.config.jsprefix);  	
   	}
 	return response;
 	
@@ -97,21 +112,16 @@
   
   */
   
-  UMI.prototype.data = {
-  	conf : setConf(),
-  	/*
-  	*
-  	* data getProperty(element_id, prop_name)
-  	*
-  	* element_id - pageid in umi
-  	* prop_name - property name
-  	*
-  	*/
-  	getProperty : function(element_id,prop_name) {
-	  var response = UMI.prototype.jsonDecode(this.conf.prots.upage + element_id + "." + prop_name + this.conf.jsprefix);
+  UMI.prototype.data = new Module("data","0.1");
+  
+  UMI.prototype.data.getProperty = function (element_id,prop_name) {
+	  var response = UMI.prototype.jsonDecode(regedit.configig.protocol.upage + element_id + "." + prop_name + regedit.configig.jsprefix);
 	  return response;
-	}
-	
+  }
+  
+  UMI.prototype.data.getPage = function (page_id) {
+	  var response = UMI.prototype.jsonDecode(regedit.config.protocol.upage+page_id+regedit.config.jsprefix).page;
+	  return response;
   }
   
   /*
@@ -122,15 +132,19 @@
   
   */
 
-  UMI.prototype.menuDraw = function(method,menu_id){
-	  var response = UMI.prototype.jsonDecode(this.conf.prots.udata + "menu/"+ method + "/" + menu_id + this.conf.jsprefix);
+  UMI.prototype.menu = new Module("menu","0.1");
+
+  UMI.prototype.menu.makeCall = function(method,menu_id){
+	  var response = UMI.prototype.jsonDecode(regedit.config.protocol.udata + "menu/"+ method + "/" + menu_id + regedit.config.jsprefix);
 	  return response;
   }
 
   
   /* onload */
   $(window).load(function(){
-	  window.umi = new UMI();
+	  window.umi = new UMI({version:"0.2"});
 	  window.umi.getVersion();
+	  var end = new Date();
+	  console.info('Скорость ' + (end.getTime()-start.getTime()) + ' мс');
   });
 })(jQuery, document, window);
