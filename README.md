@@ -12,19 +12,5 @@ DATA MODULE
 
 
 ============
-CORE MODULE
+OTHER MODULES
 ============
-
-1) core navibar - return js breadcrumbs
-
-window.umi.core("navibar");
-
-2) 
-
-============
-MENU MODULE
-============
-
-1) menu draw - retun json menu
-
-window.umi.menu("draw","10");
