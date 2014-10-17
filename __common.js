@@ -5,7 +5,7 @@
   /* CONFIG */
   
   function Configuration(){
-	 this.config = {
+  	this.config = {
 	  	 version : "0.1",
 	  	jsprefix : ".json",
 	    protocol : {
@@ -35,17 +35,32 @@
   	/* start */
   	this.init();
   }
-  /* MODULE */
+  /*
+
+  MODULE
+  
+  name - Module name
+  config - configs object
+  makeCall(method,argums) - function to call api methods in this module;
+  			method - method of the module
+  			argums - Array of params
+  
+  */
   
   function Module(moduleName,version){
-	  	this.name = moduleName;
-	 this.version = version;
+	  	 this.name = moduleName;
+	   this.config = regedit.config;
+	  this.version = version;
+	 this.makeCall = function(method,argums){
+		  var response = (argums && argums.length) ? UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + "/" + argums.join("/") + this.config.jsprefix) : UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + this.config.jsprefix);
+		  return response;
+	  }
   }
   /*
 
   
   
-  FUNCTIONS
+  !SYSTEM FUNCTIONS
   
   
   
@@ -84,29 +99,20 @@
 	  console.log(regedit.config.version);
 	  return true;
   };
+  
+  
   /*
-
-  
-  !CORE MODULE
-  
-  
-  */
-  UMI.prototype.core = new Module("core","0.1");
-  
-  UMI.prototype.core.makeCall = function (method,argums){
-  	var response = (argums && argums.length) ? UMI.prototype.jsonDecode(regedit.config.protocol.udata + "core/"+ method + "/" + argums.join("/") + regedit.config.jsprefix) : UMI.prototype.jsonDecode(regedit.config.protocol.udata + "core/"+ method + regedit.config.jsprefix);
-	return response;
-	
-  };
-  /*
-
-  
-  !DATA MODULE
-  
-  
+  !MODULES
   */
   
-  UMI.prototype.data = new Module("data","0.1");
+   UMI.prototype.catalog = new Module("catalog","0.1");
+   UMI.prototype.content = new Module("content","0.1");
+   	  UMI.prototype.core = new Module("core","0.1");
+  	  UMI.prototype.data = new Module("data","0.1");
+	  UMI.prototype.menu = new Module("menu","0.1");
+  /*
+  !EXPAND MODULES
+  */
   
   UMI.prototype.data.getProperty = function (element_id,prop_name) {
 	  var response = UMI.prototype.jsonDecode(regedit.configig.protocol.upage + element_id + "." + prop_name + regedit.configig.jsprefix);
@@ -118,25 +124,8 @@
 	  return response;
   };
   
-  /*
-
-  
-  !MENU MODULE
-  
-  
-  */
-
-  UMI.prototype.menu = new Module("menu","0.1");
-
-  UMI.prototype.menu.makeCall = function(method,menu_id){
-	  var response = UMI.prototype.jsonDecode(regedit.config.protocol.udata + "menu/"+ method + "/" + menu_id + regedit.config.jsprefix);
-	  return response;
-  };
-
-  
   /* onload */
   $(window).load(function(){
 	  window.umi = new UMI({version:"0.2"});
-	  window.umi.getVersion();
   });
 })(jQuery,document, window);
