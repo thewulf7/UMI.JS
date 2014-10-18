@@ -51,9 +51,16 @@
 	  	 this.name = moduleName;
 	   this.config = regedit.config;
 	  this.version = version;
-	 this.makeCall = function(method,argums){
+	 this.makeCall = function(method,argums,success,error){
 		  var response = (argums && argums.length) ? UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + "/" + argums.join("/") + this.config.jsprefix) : UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + this.config.jsprefix);
-		  return response;
+		  try {
+			  var sf = eval(success);
+			  sf(response,argums);
+			  return response;
+		  } catch(e) {
+			   var ef = eval(error);
+			   ef(e);
+		  }
 	  }
   }
   /*
@@ -104,12 +111,23 @@
   /*
   !MODULES
   */
-  
-   UMI.prototype.catalog = new Module("catalog","0.1");
-   UMI.prototype.content = new Module("content","0.1");
-   	  UMI.prototype.core = new Module("core","0.1");
-  	  UMI.prototype.data = new Module("data","0.1");
-	  UMI.prototype.menu = new Module("menu","0.1");
+  	   UMI.prototype.banners = new Module("banners","0.1");
+  	   UMI.prototype.blogs20 = new Module("blogs20","0.1");
+	   UMI.prototype.catalog = new Module("catalog","0.1");
+	  UMI.prototype.comments = new Module("comments","0.1");
+	   UMI.prototype.content = new Module("content","0.1");
+	   	  UMI.prototype.core = new Module("core","0.1");
+	  	  UMI.prototype.data = new Module("data","0.1");	   	  
+	   UMI.prototype.emarket = new Module("emarket","0.1");
+	       UMI.prototype.faq = new Module("faq","0.1");
+         UMI.prototype.forum = new Module("forum","0.1"); 
+		  UMI.prototype.menu = new Module("menu","0.1");
+		  UMI.prototype.news = new Module("news","0.1");
+	UMI.prototype.photoalbum = new Module("photoalbum","0.1");
+		UMI.prototype.search = new Module("search","0.1");
+		UMI.prototype.system = new Module("system","0.1");
+		 UMI.prototype.users = new Module("users","0.1");
+	  UMI.prototype.webforms = new Module("webforms","0.1");
   /*
   !EXPAND MODULES
   */
