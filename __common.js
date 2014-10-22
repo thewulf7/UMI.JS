@@ -54,12 +54,10 @@
 	 this.makeCall = function(method,argums,success,error){
 		  var response = (argums && argums.length) ? UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + "/" + argums.join("/") + this.config.jsprefix) : UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + this.config.jsprefix);
 		  try {
-			  var sf = eval(success);
-			  sf(response,argums);
+			  success(response,argums);
 			  return response;
 		  } catch(e) {
-			   var ef = eval(error);
-			   ef(e);
+			  error(e);
 		  }
 	  }
   }
