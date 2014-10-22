@@ -79,7 +79,12 @@
   
   UMI.prototype.init = function(){
 	//getcurrentpage
-  	this.page = this.jsonDecode(regedit.config.protocol.upage+window.location.pathname+regedit.config.jsprefix).page;
+  	try{
+  		this.page = this.jsonDecode(regedit.config.protocol.upage+window.location.pathname+regedit.config.jsprefix).page;
+  	}
+  	catch(e) {
+	  	throw "THIS IS NOT UMI";
+  	}
   	console.timeEnd('umi.js init');
   };
   
@@ -88,9 +93,15 @@
   UMI.prototype.http = function(url,type){
   	type = type || "GET";
     var xmlHttp = null;
-    xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( type, url, false );
-    xmlHttp.send( null );
+    try {
+	    xmlHttp = new XMLHttpRequest();
+	    xmlHttp.open( type, url, false );
+	    xmlHttp.send( null );
+	    
+    }
+    catch(e) {
+	    throw e;
+    }
     return xmlHttp.responseText;
   };
   
