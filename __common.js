@@ -8,6 +8,7 @@
   	this.config = {
 	  	 version : "0.1",
 	  	jsprefix : ".json",
+	   transform : "/layouts/ajax.xsl",
 	    protocol : {
 		  	  upage : "/upage/",
 		  	  udata : "/udata/",
@@ -53,6 +54,15 @@
 	  this.version = version;
 	 this.makeCall = function(method,argums,success,error){
 		  var response = (argums && argums.length) ? UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + "/" + argums.join("/") + this.config.jsprefix) : UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + this.config.jsprefix);
+		  try {
+			  success(response,argums);
+			  return response;
+		  } catch(e) {
+			  error(e);
+		  }
+	  }
+	this.transform = function(method,argums,success,error){
+		  var response = (argums && argums.length) ? UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + "/" + argums.join("/") + "?"+ this.config.transform) : UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + "?"+ this.config.transform);
 		  try {
 			  success(response,argums);
 			  return response;
@@ -126,6 +136,7 @@
 	  UMI.prototype.comments = new Module("comments","0.1");
 	   UMI.prototype.content = new Module("content","0.1");
 	   	  UMI.prototype.core = new Module("core","0.1");
+	   	UMI.prototype.custom = new Module("custom","0.1");
 	  	  UMI.prototype.data = new Module("data","0.1");	   	  
 	   UMI.prototype.emarket = new Module("emarket","0.1");
 	       UMI.prototype.faq = new Module("faq","0.1");
