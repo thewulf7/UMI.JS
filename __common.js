@@ -55,21 +55,114 @@
 	 this.makeCall = function(method,argums,success,error){
 		  var response = (argums && argums.length) ? UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + "/" + argums.join("/") + this.config.jsprefix) : UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + this.config.jsprefix);
 		  try {
-			  success(response,argums);
-			  return response;
+		  	var func = eval(success);
+	  		func && func(response,argums);
 		  } catch(e) {
-			  error(e);
+		  	var funce = eval(error);
+	  		funce && funce(e);
 		  }
+		  return response;
 	  }
 	this.transform = function(method,argums,success,error){
 		  var response = (argums && argums.length) ? UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + "/" + argums.join("/") + "?"+ this.config.transform) : UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/"+ method + "?"+ this.config.transform);
 		  try {
-			  success(response,argums);
-			  return response;
+		  	var func = eval(success);
+	  		func && func(response,argums);
 		  } catch(e) {
-			  error(e);
+		  	var funce = eval(error);
+	  		funce && funce(e);
 		  }
+		  return response;
 	  }
+  }
+  
+  function Basket() {
+  	  this.config = regedit.config;
+  	  this.__transformOptions = function(options) {
+			var o = {};
+			for(var i in options) {
+				var k;
+				if(i.toLowerCase() != "amount") k = "options[" + i + "]";
+				else k = i;
+				o[k] = options[i];
+			}
+			return o;
+		};
+	  this.get = function(callback){
+	  	var response = UMI.prototype.jsonDecode(this.config.protocol.udata+"emarket/basket"+this.config.jsprefix);
+	  	try {
+	  		var func = eval(callback);
+	  		func && func(response);
+	  	}
+	  	catch(e) {
+			throw e;
+		}
+	  	return response;
+	  };
+	  this.put = function(id,options,callback){
+	    var opts = this.__transformOptions(options);
+	  	var response = UMI.prototype.jsonDecode(this.config.protocol.udata+"emarket/basket/put/element/"+id+this.config.jsprefix,"POST",opts);
+	  	try {
+	  		var func = eval(callback);
+	  		func && func(response);
+	  	}
+	  	catch(e) {
+			throw e;
+		}
+	  	return response;
+	  };
+	  this.modify = function(id,options,callback){
+	  	var opts = this.__transformOptions(options);
+	  	
+	  	if(opts.amount==0) {
+	  		this.removeItem(id,callback);
+		  	return;
+	  	} 
+	  	var response = UMI.prototype.jsonDecode(this.config.protocol.udata+"emarket/basket/put/item/"+id+this.config.jsprefix,"POST",opts);
+	  	try {
+	  		var func = eval(callback);
+	  		func && func(response);
+	  	}
+	  	catch(e) {
+			throw e;
+		}
+	  	return response;
+	  };
+	  this.removeItem = function(id,options,callback){
+	    var opts = this.__transformOptions(options);
+	  	var response = UMI.prototype.jsonDecode(this.config.protocol.udata+"emarket/basket/remove/item/"+id+this.config.jsprefix,"POST",opts);
+	  	try {
+	  		var func = eval(callback);
+	  		func && func(response);
+	  	}
+	  	catch(e) {
+			throw e;
+		}
+	  	return response;
+	  }; 
+	  this.removeElement = function(id,options,callback){
+	    var opts = this.__transformOptions(options);
+	  	var response = UMI.prototype.jsonDecode(this.config.protocol.udata+"emarket/basket/remove/element/"+id+this.config.jsprefix,"POST",opts);
+	  	try {
+	  		var func = eval(callback);
+	  		func && func(response);
+	  	}
+	  	catch(e) {
+			throw e;
+		}
+	  	return response;
+	  };
+	  this.clear = function(callback){
+	  	var response = UMI.prototype.jsonDecode(this.config.protocol.udata+"emarket/basket/remove_all"+this.config.jsprefix);
+	  	try {
+	  		var func = eval(callback);
+	  		func && func(response);
+	  	}
+	  	catch(e) {
+			throw e;
+		}
+	  	return response;
+	  };  
   }
   /*
 
@@ -98,19 +191,35 @@
   
   /* HTTPRequest */
   
-  UMI.prototype.http = function(url,type){
+  UMI.prototype.http = function(url,type,body){
   	type = type || "GET";
     var xmlHttp = null;
+    
+    if (body instanceof String) {
+		  var str = [];
+		  for(var p in body)
+		    if (body.hasOwnProperty(p)) {
+		      str.push(encodeURIComponent(p) + "=" + encodeURIComponent(body[p]));
+		    }
+		   body = str.join("&");
+    }
+    
     try {
 	    xmlHttp = new XMLHttpRequest();
 	    xmlHttp.open( type, url, false );
-	    xmlHttp.send( null );
-	    
+	    if(type=="POST") {
+		    xmlHttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+		    xmlHttp.send( body );
+	    } else {
+		    xmlHttp.send( null );
+	    } 
+	    if(xmlHttp.status == 200) {
+		    return xmlHttp.responseText;
+	    }
     }
     catch(e) {
 	    throw e;
     }
-    return xmlHttp.responseText;
   };
   
   /* JSON decode */
@@ -161,6 +270,8 @@
 	  var response = UMI.prototype.jsonDecode(regedit.config.protocol.upage+page_id+regedit.config.jsprefix).page;
 	  return response;
   };
+  
+  UMI.prototype.basket = new Basket();
   
   /* onload */
   $(window).load(function(){
