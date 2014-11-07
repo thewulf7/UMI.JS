@@ -1,5 +1,4 @@
-;
-(function ($, doc, win) {
+var umi = (function () {
     "use strict";
 
     console.time('umi.js init');
@@ -50,10 +49,20 @@
 
      */
 
-    function Module(moduleName, version) {
+    function Module(moduleName, customconfig) {
         this.name = moduleName;
         this.config = regedit.config;
-        this.version = version;
+
+        if(customconfig) {
+            for (var obj in customconfig) {
+                try {
+                    this.config[obj] = customconfig[obj];
+                } catch (e) {
+                    throw e;
+                }
+            }
+        }
+
         this.makeCall = function (method, argums, options, success, error) {
             var response = (argums && argums.length) ? UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/" + method + "/" + argums.join("/") + this.config.jsprefix,"GET",options) : UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/" + method + this.config.jsprefix,"GET",options);
             try {
@@ -76,8 +85,55 @@
             }
             return response;
         }
+        this.addMethod = function (method, success) {
+            if(!this[method]) {
+                this[method] = eval(success);
+                return true;
+            }
+            else {
+                throw "This method already exists."
+            }
+        }
     }
-
+    function Compare() {
+        this.config = regedit.config;
+        this.add = function(id, options, callback){
+            var opts = this.__transformOptions(options);
+            var response = UMI.prototype.jsonDecode(this.config.protocol.udata + "emarket/addToCompare/" + id + this.config.jsprefix, "POST", opts);
+            try {
+                var func = eval(callback);
+                func && func(response);
+            }
+            catch (e) {
+                throw e;
+            }
+            return response;
+        };
+        this.remove = function(id, options, callback){
+            var opts = this.__transformOptions(options);
+            var response = UMI.prototype.jsonDecode(this.config.protocol.udata + "emarket/removeFromCompare/" + id + this.config.jsprefix, "POST", opts);
+            try {
+                var func = eval(callback);
+                func && func(response);
+            }
+            catch (e) {
+                throw e;
+            }
+            return response;
+        };
+        this.list = function(options, callback){
+            var opts = this.__transformOptions(options);
+            var response = UMI.prototype.jsonDecode(this.config.protocol.udata + "emarket/getCompareList" + this.config.jsprefix, "GET", opts);
+            try {
+                var func = eval(callback);
+                func && func(response);
+            }
+            catch (e) {
+                throw e;
+            }
+            return response;
+        };
+    }
     function Basket() {
         this.config = regedit.config;
         this.__transformOptions = function (options) {
@@ -235,41 +291,27 @@
         var content = this.http(url, type, options);
         return JSON.parse(content);
     };
-
-    /* CurrentVersion of script */
-    UMI.prototype.getVersion = function () {
-        console.log(regedit.config.version);
-        return true;
+    //METHOD TO ADD NEW MODULE
+    UMI.prototype.addNewModule = function (name,params) {
+        if(name) UMI.prototype[name] = new Module(name,params);
+        return UMI.prototype[name];
     };
-
 
     /*
      !MODULES
      */
-    UMI.prototype.banners = new Module("banners", "0.1");
-    UMI.prototype.blogs20 = new Module("blogs20", "0.1");
-    UMI.prototype.catalog = new Module("catalog", "0.1");
-    UMI.prototype.comments = new Module("comments", "0.1");
-    UMI.prototype.content = new Module("content", "0.1");
-    UMI.prototype.core = new Module("core", "0.1");
-    UMI.prototype.custom = new Module("custom", "0.1");
-    UMI.prototype.data = new Module("data", "0.1");
-    UMI.prototype.emarket = new Module("emarket", "0.1");
-    UMI.prototype.faq = new Module("faq", "0.1");
-    UMI.prototype.forum = new Module("forum", "0.1");
-    UMI.prototype.menu = new Module("menu", "0.1");
-    UMI.prototype.news = new Module("news", "0.1");
-    UMI.prototype.photoalbum = new Module("photoalbum", "0.1");
-    UMI.prototype.search = new Module("search", "0.1");
-    UMI.prototype.system = new Module("system", "0.1");
-    UMI.prototype.users = new Module("users", "0.1");
-    UMI.prototype.webforms = new Module("webforms", "0.1");
+
+    var modules = ["banners","blogs20","catalog","comments","content","core","custom","data","emarket","faq","forum","menu","news","photoalbum","search","system","users","webforms"];
+    for(var module in modules) {
+        UMI.prototype[modules[module]] = new Module(modules[module]);
+    }
+
     /*
      !EXPAND MODULES
      */
 
     UMI.prototype.data.getProperty = function (element_id, prop_name) {
-        var response = UMI.prototype.jsonDecode(regedit.configig.protocol.upage + element_id + "." + prop_name + regedit.configig.jsprefix);
+        var response = UMI.prototype.jsonDecode(regedit.config.protocol.upage + element_id + "." + prop_name + regedit.config.jsprefix);
         return response;
     };
 
@@ -280,14 +322,9 @@
 
     UMI.prototype.basket = new Basket();
 
-    /*TODO
-    *   Add sendform
-    *   Add form validate
-    *   Add compare
-    */
+    UMI.prototype.compare = new Compare();
 
-    /* onload */
-    $(window).load(function () {
-        window.umi = new UMI({version: "0.2"});
-    });
-})(jQuery, document, window);
+    //UMI.prototype.form = new Form();
+
+    return new UMI();
+})();
