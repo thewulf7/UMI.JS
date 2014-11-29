@@ -64,10 +64,13 @@ var umi = (function () {
         }
 
         this.makeCall = function (method, argums, options, success, error) {
+        
             var response = (argums && argums.length) ? UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/" + method + "/" + argums.join("/") + this.config.jsprefix,"GET",options) : UMI.prototype.jsonDecode(this.config.protocol.udata + this.name + "/" + method + this.config.jsprefix,"GET",options);
             try {
                 var func = eval(success);
                 func && func(response, argums);
+                var event = new CustomEvent(module+'2'+method, { detail: {"method":method,"module":this.name,"response":response} });
+	            document.dispatchEvent(event);
             } catch (e) {
                 var funce = eval(error);
                 funce && funce(e);
@@ -79,6 +82,8 @@ var umi = (function () {
             try {
                 var func = eval(success);
                 func && func(response, argums);
+                var event = new CustomEvent(module+'2'+method, { detail: {"method":method,"module":this.name,"response":response} });
+	            document.dispatchEvent(event);
             } catch (e) {
                 var funce = eval(error);
                 funce && funce(e);
@@ -273,9 +278,10 @@ var umi = (function () {
 
     /* HTTPRequest */
 
-    UMI.prototype.http = function (url, type, body) {
-        type = type || "GET";
-        body = body || "";
+    UMI.prototype.http = function () {
+    	var url = arguments[0] || "";
+        type = arguments[1] || "GET";
+        body = arguments[2] || "";
         var xmlHttp = null;
 
         if (body != null) {
@@ -313,8 +319,8 @@ var umi = (function () {
 
     /* JSON decode */
 
-    UMI.prototype.jsonDecode = function (url, type, options) {
-        var content = this.http(url, type, options);
+    UMI.prototype.jsonDecode = function () {
+        var content = this.http(arguments);
         return JSON.parse(content);
     };
     //METHOD TO ADD NEW MODULE
