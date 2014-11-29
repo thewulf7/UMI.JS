@@ -97,27 +97,47 @@ var umi = (function () {
     }
     function Compare() {
         this.config = regedit.config;
+	    this.__transformOptions = function (options) {
+		    var o = {};
+		    for (var i in options) {
+			    var k;
+			    if (i.toLowerCase() != "amount") k = "options[" + i + "]";
+			    else k = i;
+			    o[k] = options[i];
+		    }
+		    return o;
+	    };
         this.add = function(id, options, callback){
+	        var self = this;
             var opts = this.__transformOptions(options);
-            var response = UMI.prototype.jsonDecode(this.config.protocol.udata + "emarket/addToCompare/" + id + this.config.jsprefix, "POST", opts);
+
+	        var response = UMI.prototype.jsonDecode("/emarket/addToCompare/" + id +"/"+ this.config.jsprefix, "GET", opts);
+
             try {
                 var func = eval(callback);
+	            var list = self.list();
+	            var event = new CustomEvent('add2compare', { detail: {"element":id,"list":list} });
+	            document.dispatchEvent(event);
                 func && func(response);
             }
             catch (e) {
-                throw e;
+                throw "error adding to compare";
             }
             return response;
         };
         this.remove = function(id, options, callback){
+	        var self = this;
             var opts = this.__transformOptions(options);
-            var response = UMI.prototype.jsonDecode(this.config.protocol.udata + "emarket/removeFromCompare/" + id + this.config.jsprefix, "POST", opts);
+            var response = UMI.prototype.jsonDecode("/emarket/removeFromCompare/" + id +"/" + this.config.jsprefix, "GET", opts);
             try {
                 var func = eval(callback);
+	            var list = self.list();
+	            var event = new CustomEvent('remove2compare', { detail: {"element":id,"list":list} });
+	            document.dispatchEvent(event);
                 func && func(response);
             }
             catch (e) {
-                throw e;
+                throw "error removing from compare";
             }
             return response;
         };
@@ -158,10 +178,14 @@ var umi = (function () {
             return response;
         };
         this.put = function (id, options, callback) {
+	        var self = this;
             var opts = this.__transformOptions(options);
             var response = UMI.prototype.jsonDecode(this.config.protocol.udata + "emarket/basket/put/element/" + id + this.config.jsprefix, "POST", opts);
             try {
                 var func = eval(callback);
+	            var basket = self.get();
+	            var event = new CustomEvent('add2basket', { detail: {"element":id,"basket":basket} });
+	            document.dispatchEvent(event);
                 func && func(response);
             }
             catch (e) {
@@ -276,8 +300,10 @@ var umi = (function () {
             } else {
                 xmlHttp.send(null);
             }
-            if (xmlHttp.status == 200) {
+            if (xmlHttp.status == 200 && xmlHttp.responseURL==window.location.origin+url) {
                 return xmlHttp.responseText;
+            } else {
+	            return "{}";
             }
         }
         catch (e) {
