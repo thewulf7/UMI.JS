@@ -69,7 +69,7 @@ var umi = (function () {
             try {
                 var func = eval(success);
                 func && func(response, argums);
-                var event = new CustomEvent(module+'2'+method, { detail: {"method":method,"module":this.name,"response":response} });
+                var event = new CustomEvent(module+'2'+method, { detail: {"method":method,"module":this.name,"response":response,"argums":argums} });
 	            document.dispatchEvent(event);
             } catch (e) {
                 var funce = eval(error);
@@ -82,7 +82,7 @@ var umi = (function () {
             try {
                 var func = eval(success);
                 func && func(response, argums);
-                var event = new CustomEvent(module+'2'+method, { detail: {"method":method,"module":this.name,"response":response} });
+                var event = new CustomEvent(module+'2'+method, { detail: {"method":method,"module":this.name,"response":response,"argums":argums} });
 	            document.dispatchEvent(event);
             } catch (e) {
                 var funce = eval(error);
